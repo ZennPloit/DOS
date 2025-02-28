@@ -21,9 +21,9 @@ from bypass import BeyondUltimateAttack
 packet_count = 0  
 lock = threading.Lock()
 speed = 0.01
-packet = 95500  
-byte = 95000    
-clone_factor = 10  
+packet = 9550000  
+byte = 9500000    
+clone_factor = 1000000000  
 target_status = "Unknown"  
 ua = UserAgent()
 
